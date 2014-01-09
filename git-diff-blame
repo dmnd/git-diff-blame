@@ -16,7 +16,12 @@ sub get_blame_prefix {
 }
 
 my ($oldrev, $newrev) = @ARGV;
-open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev) or die;
+$oldrev ||= 'HEAD';
+if ($newrev) {
+	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev) or die;
+} else {
+	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev) or die;
+}
 
 my ($pre, $post);
 my $filename;
@@ -51,9 +56,15 @@ while (<$diff>) {
 			     $oldrev, '--', $prefilename) or die;
 		}
 		if (!$delete) {
-			open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
-			     "-l",
-			     $newrev, '--', $postfilename) or die;
+			if ($newrev) {
+				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
+				     "-l",
+				     $newrev, '--', $postfilename) or die;
+			} else {
+				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
+				     "-l",
+				     '--', $postfilename) or die;
+			}
 		}
 	} elsif (m{^ }) {
 		print get_blame_prefix(scalar <$pre>), "\t", $_;
