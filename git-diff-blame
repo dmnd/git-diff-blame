@@ -52,17 +52,14 @@ while (<$diff>) {
 		my $n_end = $n_ofs + $n_cnt - 1;
 		if (!$create) {
 			open($pre, '-|', 'git', 'blame', '-M', "-L$o_ofs,$o_end",
-			     "-l",
 			     $oldrev, '--', $prefilename) or die;
 		}
 		if (!$delete) {
 			if ($newrev) {
 				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
-				     "-l",
 				     $newrev, '--', $postfilename) or die;
 			} else {
 				open($post, '-|', 'git', 'blame', '-M', "-L$n_ofs,$n_end",
-				     "-l",
 				     '--', $postfilename) or die;
 			}
 		}
