@@ -11,7 +11,7 @@ sub parse_hunk_header {
 
 sub get_blame_prefix {
 	my ($line) = @_;
-	$line =~ /^([0-9a-f]+\s+(\S+\s+)?\([^\)]+\))/ or die "bad blame output: $line";
+	$line =~ /^(\^?[0-9a-f]+\s+(\S+\s+)?\([^\)]+\))/ or die "bad blame output: $line";
 	return $1;
 }
 
