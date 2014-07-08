@@ -15,6 +15,11 @@ sub get_blame_prefix {
 	return $1;
 }
 
+$git_root = `git rev-parse --show-toplevel`;
+$git_root =~ s/^\s+//;
+$git_root =~ s/\s+$//;
+chdir($git_root) or die "$!";
+
 my ($oldrev, $newrev) = @ARGV;
 $oldrev ||= 'HEAD';
 if ($newrev) {
