@@ -69,11 +69,11 @@ while (<$diff>) {
 			}
 		}
 	} elsif (m{^ }) {
-		print "   ", get_blame_prefix(scalar <$pre>), "\t", $_;
+		print "    ", get_blame_prefix(scalar <$pre>), "\t", $_;
 		scalar <$post>; # discard
 	} elsif (m{^\-}) {
-		print "-  ", get_blame_prefix(scalar <$pre>), "\t", $_;
+		print "[31m -  ", get_blame_prefix(scalar <$pre>), "\t", $_,"[m ";
 	} elsif (m{^\+}) {
-		print "+  ", get_blame_prefix(scalar <$post>), "\t", $_;
+		print "[32m +  ", get_blame_prefix(scalar <$post>), "\t", $_,"[m ";
 	}
 }
