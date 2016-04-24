@@ -72,8 +72,8 @@ while (<$diff>) {
 		print "    ", get_blame_prefix(scalar <$pre>), "\t", $_;
 		scalar <$post>; # discard
 	} elsif (m{^\-}) {
-		print "[31m -  ", get_blame_prefix(scalar <$pre>), "\t", $_,"[m ";
+		print "[31m -  ", get_blame_prefix(scalar <$pre>), "\t", $_,"[m";
 	} elsif (m{^\+}) {
-		print "[32m +  ", get_blame_prefix(scalar <$post>), "\t", $_,"[m ";
+		print "[32m +  ", get_blame_prefix(scalar <$post>), "\t", $_,"[m";
 	}
 }
