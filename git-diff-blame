@@ -35,6 +35,10 @@ if ($newrev) {
 	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev) or die;
 }
 
+my $istty = -t STDOUT;
+my $ANSI_RED = $istty ? "[31m" : "";
+my $ANSI_GRN = $istty ? "[32m" : "";
+my $ANSI_RST = $istty ? "[m"   : "";
 my ($pre, $post);
 my $filename;
 while (<$diff>) {
@@ -79,8 +83,8 @@ while (<$diff>) {
 		print "    ", get_blame_prefix(scalar <$pre>), "\t", $_;
 		scalar <$post>; # discard
 	} elsif (m{^\-}) {
-		print "[31m -  ", get_blame_prefix(scalar <$pre>), "\t", $_,"[m";
+		print "${ANSI_RED} -  ", get_blame_prefix(scalar <$pre>), "\t", $_,"${ANSI_RST}";
 	} elsif (m{^\+}) {
-		print "[32m +  ", get_blame_prefix(scalar <$post>), "\t", $_,"[m";
+		print "${ANSI_GRN} +  ", get_blame_prefix(scalar <$post>), "\t", $_,"${ANSI_RST}";
 	}
 }
