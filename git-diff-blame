@@ -52,6 +52,11 @@ if (defined $oldrev && $oldrev =~ /^-/) {
 	$oldrev = undef;
 }
 
+# 123abc 123abc --> 123abc^ 123abc
+if (defined $oldrev && defined $newrev && $oldrev eq $newrev) {
+	$oldrev = $oldrev . "^";
+}
+
 if (defined $oldrev) {
 	if (defined $newrev) {
 		open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev, @REST) or die;
