@@ -2,6 +2,20 @@
 
 Annotates each line in a diff hunk with author and commit information like blame.
 
+## Usage
+
+```shell
+git diff-blame [oldrev [newrev [options] [-- [file1] [file2] [file3] ...]]]
+```
+
+There is support for passing on options to `git diff` but they must be given
+after `oldrev` and `newrev` if they are present. E.g.
+
+```shell
+git diff-blame HEAD^ HEAD -w
+git diff-blame --cached -- myfile.c
+```
+
 ## Example:
 
     $ git diff-blame HEAD^

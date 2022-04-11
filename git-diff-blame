@@ -7,6 +7,8 @@
 # binary, for any purpose, commercial or non-commercial, and by any
 # means.
 
+use List::Util qw(first);
+
 sub parse_hunk_header {
 	my ($line) = @_;
 	my ($o_ofs, $o_cnt, $n_ofs, $n_cnt) =
@@ -18,6 +20,7 @@ sub parse_hunk_header {
 
 sub get_blame_prefix {
 	my ($line) = @_;
+	return "" if not $line;
 	$line =~ /^(\^?[0-9a-f]+\s+(\S+\s+)?\([^\)]+\))/ or die "bad blame output: $line";
 	return $1;
 }
@@ -27,12 +30,41 @@ $git_root =~ s/^\s+//;
 $git_root =~ s/\s+$//;
 chdir($git_root) or die "$!";
 
-my ($oldrev, $newrev) = @ARGV;
-$oldrev ||= 'HEAD';
-if ($newrev) {
-	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev) or die;
+my ($oldrev, $newrev, @REST);
+
+# First check if file arguments are present.
+my $index = first { $ARGV[$_] eq '--' } 0..$#ARGV;
+if (defined $index) {
+	($oldrev, $newrev) = @ARGV[0 .. $index-1];
+	@REST = @ARGV[$index .. $#ARGV];
 } else {
-	open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev) or die;
+	($oldrev, $newrev, @REST) = @ARGV;
+}
+
+# Then check if any of the revisons accidentally were assigned git diff option values.
+if (defined $newrev && $newrev =~ /^-/) {
+	unshift(@REST, $newrev);
+	$newrev = undef;
+}
+
+if (defined $oldrev && $oldrev =~ /^-/) {
+	unshift(@REST, $oldrev);
+	$oldrev = undef;
+}
+
+# 123abc 123abc --> 123abc^ 123abc
+if (defined $oldrev && defined $newrev && $oldrev eq $newrev) {
+	$oldrev = $oldrev . "^";
+}
+
+if (defined $oldrev) {
+	if (defined $newrev) {
+		open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, $newrev, @REST) or die;
+	} else {
+		open($diff, '-|', 'git', '--no-pager', 'diff', $oldrev, @REST) or die;
+	}
+} else {
+	open($diff, '-|', 'git', '--no-pager', 'diff', @REST) or die;
 }
 
 my ($pre, $post);
@@ -63,8 +95,13 @@ while (<$diff>) {
 		my $o_end = $o_ofs + $o_cnt - 1;
 		my $n_end = $n_ofs + $n_cnt - 1;
 		if (!$create) {
-			open($pre, '-|', 'git', 'blame', '-M', "-L$o_ofs,$o_end",
-			     $oldrev, '--', $prefilename) or die;
+			if ($oldrev) {
+				open($pre, '-|', 'git', 'blame', '-M', "-L$o_ofs,$o_end",
+				$oldrev, '--', $prefilename) or die;
+			} else {
+				open($pre, '-|', 'git', 'blame', '-M', "-L$o_ofs,$o_end",
+				'HEAD', '--', $prefilename) or die;
+			}
 		}
 		if (!$delete) {
 			if ($newrev) {
